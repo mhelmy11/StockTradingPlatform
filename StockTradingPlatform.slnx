@@ -3,4 +3,13 @@
     <Project Path="src/AppHost/AppHost.csproj" />
     <Project Path="src/ServiceDefaults/ServiceDefaults.csproj" />
   </Folder>
+  <Folder Name="/src/Gateway/">
+    <Project Path="src/Gateway/ApiGateway/ApiGateway.csproj" />
+  </Folder>
+  <Folder Name="/src/Services/">
+    <Project Path="src/Services/OrderService/OrderService.csproj" />
+  </Folder>
+  <Folder Name="/src/Shared/">
+    <Project Path="src/Shared/BuildingBlocks/BuildingBlocks.csproj" />
+  </Folder>
 </Solution>
