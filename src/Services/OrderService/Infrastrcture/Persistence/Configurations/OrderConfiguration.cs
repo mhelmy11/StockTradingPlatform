@@ -9,7 +9,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
 {
     public void Configure(EntityTypeBuilder<Order> builder)
     {
-        builder.ToTable("orders");
+        builder.ToTable("Orders");
 
         builder.HasKey(o => o.Id);
 
@@ -30,6 +30,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
                 s => s.Value,
                 value => Symbol.From(value))
             .HasMaxLength(10)
+            .IsUnicode(false)
             .IsRequired();
 
         builder.Property(o => o.Side)
@@ -56,15 +57,21 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasConversion(
                 p => p == null ? (decimal?)null : p.Amount,
                 value => value == null ? null : Price.From(value.Value))
-            .HasPrecision(18, 4);
+            .HasColumnType("decimal(18,4)");
 
         builder.Property(o => o.Status)
             .HasConversion<int>()
             .IsRequired();
 
-        builder.Property(o => o.PlacedAt).IsRequired();
-        builder.Property(o => o.CancelledAt);
-        builder.Property(o => o.FilledAt);
+        builder.Property(o => o.PlacedAt)
+            .IsRequired()
+            .HasColumnType("datetimeoffset");
+        ;
+        builder.Property(o => o.CancelledAt)
+            .HasColumnType("datetimeoffset");
+        ;
+        builder.Property(o => o.FilledAt)
+            .HasColumnType("datetimeoffset");
 
         // Indexes
         builder.HasIndex(o => o.UserId);
