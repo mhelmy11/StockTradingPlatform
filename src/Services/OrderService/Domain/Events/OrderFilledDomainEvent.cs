@@ -7,6 +7,8 @@ namespace OrderService.Domain.Events;
 
 public sealed record OrderFilledDomainEvent(
     OrderId OrderId,
+    UserId UserId,
+    Symbol Symbol,
     Quantity FilledQuantity,
     Price ExecutionPrice,
     OrderStatus NewStatus)
