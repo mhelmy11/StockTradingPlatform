@@ -1,11 +1,15 @@
 using System.Reflection;
+using Carter;
+using IdGen.DependencyInjection;
 using OrderService.Infrastrcture.Persistence;
 using Shared.Extensions;
+using Shared.Results;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSharedInfrastructure([Assembly.GetExecutingAssembly()]);
+builder.Services.AddIdGen(1);
 
+builder.Services.AddSharedInfrastructure([Assembly.GetExecutingAssembly()]);
 builder.Services.AddOrderInfrastructure(builder.Configuration);
 
 
@@ -19,9 +23,13 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwaggerUi(options =>
+   {
+       options.DocumentPath = "openapi/v1.json";
+   });
 }
-
-app.UseHttpsRedirection();
+app.UseExceptionHandler();
+app.MapCarter();
 
 
 app.Run();

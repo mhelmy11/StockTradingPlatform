@@ -1,13 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>278c5c9b-eec1-4e7a-92fa-4165060ecf30</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Aspire.StackExchange.Redis" />
+    <PackageReference Include="Yarp.ReverseProxy" />
+    <PackageReference Include="Duende.AccessTokenManagement.OpenIdConnect" />
+    <PackageReference Include="Duende.BFF.Yarp" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
+    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery.Yarp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ServiceDefaults\ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

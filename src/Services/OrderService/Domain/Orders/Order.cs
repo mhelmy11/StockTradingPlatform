@@ -76,7 +76,10 @@ public sealed class Order : AggregateRoot
         Status = OrderStatus.Cancelled;
         CancelledAt = DateTimeOffset.UtcNow;
 
-        RaiseDomainEvent(new OrderCancelledDomainEvent(Id));
+        RaiseDomainEvent(new OrderCancelledDomainEvent(
+            Id,
+            UserId,
+            Symbol));
     }
 
     public void ApplyFill(Quantity filledQuantity, Price executionPrice)
@@ -108,6 +111,8 @@ public sealed class Order : AggregateRoot
 
         RaiseDomainEvent(new OrderFilledDomainEvent(
             Id,
+            UserId,
+            Symbol,
             filledQuantity,
             executionPrice,
             Status));

@@ -9,4 +9,17 @@
     <UserSecretsId>7b2c28be-6ac5-4a2d-8e6f-ade1c50b6b04</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Kafka" />
+    <PackageReference Include="Aspire.Hosting.Redis" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" />
+    <PackageReference Include="Aspire.Hosting.Keycloak" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Gateway\ApiGateway\ApiGateway.csproj" />
+    <ProjectReference Include="..\Services\OrderService\OrderService.csproj" />
+  </ItemGroup>
+
 </Project>
