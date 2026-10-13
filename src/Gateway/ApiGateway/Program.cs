@@ -36,7 +36,7 @@ builder
         CookieAuthenticationDefaults.AuthenticationScheme,
         options =>
         {
-            options.Cookie.Name = ".linkedIn.yarp";
+            options.Cookie.Name = ".stock.yarp";
             options.Cookie.SameSite = SameSiteMode.Lax;
             options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 

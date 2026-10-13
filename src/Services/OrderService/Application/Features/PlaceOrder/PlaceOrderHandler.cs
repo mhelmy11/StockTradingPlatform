@@ -14,22 +14,35 @@ public sealed class PlaceOrderHandler
     private readonly IOrderRepository _orders;
     private readonly IUnitOfWork _uow;
     private readonly ICurrentUserService currentUserService;
+    private readonly ILogger<PlaceOrderHandler> logger;
 
     public PlaceOrderHandler(
         IOrderRepository orders,
         IUnitOfWork uow,
-        [FromKeyedServices("Headers")] ICurrentUserService currentUserService
+        [FromKeyedServices("Headers")] ICurrentUserService currentUserService,
+        ILogger<PlaceOrderHandler> logger
         )
     {
         _orders = orders;
         _uow = uow;
         this.currentUserService = currentUserService;
+        this.logger = logger;
     }
 
     public async Task<Result<PlaceOrderResponse>> Handle(
         PlaceOrderCommand request,
         CancellationToken ct)
     {
+
+        logger.LogInformation("Placing order for user {UserId} with symbol {Symbol}, side {Side}, type {Type}, quantity {Quantity}, limit price {LimitPrice}",
+            currentUserService.GetCurrentUserId(),
+            request.Symbol,
+            request.Side,
+            request.Type,
+            request.Quantity,
+            request.LimitPrice);
+
+
         var symbol = Symbol.From(request.Symbol);
         var side = (Side)request.Side;
         var type = (OrderType)request.Type;

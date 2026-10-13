@@ -22,7 +22,6 @@ var kcDbPassword = builder.AddParameter("KC-DB-PASSWORD", secret: true);
 var keycloak = builder.AddKeycloak("keycloak", 8082)
     .WithImageTag("latest")
     .WithDataVolume()
-    .WithContainerNetworkAlias("linkedIn-network")
     .WithOtlpExporter()
     .WithExternalHttpEndpoints()
     .WithEnvironment("KC_DB", kcDb)
@@ -30,7 +29,7 @@ var keycloak = builder.AddKeycloak("keycloak", 8082)
     .WithEnvironment("KC_DB_USERNAME", kcDbUsername)
     .WithEnvironment("KC_DB_PASSWORD", kcDbPassword)
     .WithReference(sqlserver)
-    .WithRealmImport("./Realms")
+    // .WithRealmImport("./Realms")
     .WithArgs("--features=docker,admin-fine-grained-authz,token-exchange,quick-theme")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithUrls(context =>
@@ -157,6 +156,7 @@ var orderService = builder.AddProject<OrderService>("order-service")
 
 builder.AddProject<ApiGateway>("APIGateway")
 .WithReference(orderService)
+.WithReference(keycloak)
 .WithReference(redis);
 
 

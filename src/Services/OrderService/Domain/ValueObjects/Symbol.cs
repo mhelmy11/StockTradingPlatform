@@ -1,6 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
-using BuildingBlocks.Domain;
+using Shared.Domain;
 
 namespace OrderService.Domain.ValueObjects;
 

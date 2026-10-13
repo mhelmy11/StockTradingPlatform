@@ -1,4 +1,4 @@
-using BuildingBlocks.Domain;
+using Shared.Domain;
 using Microsoft.EntityFrameworkCore;
 using OrderService.Domain.Orders;
 using OrderService.Infrastrcture.Persistence.Messaging;

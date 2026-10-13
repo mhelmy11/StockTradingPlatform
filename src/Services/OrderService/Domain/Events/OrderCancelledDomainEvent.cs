@@ -1,7 +1,7 @@
 using System;
-using BuildingBlocks.Domain;
 using OrderService.Domain.Orders;
 using OrderService.Domain.ValueObjects;
+using Shared.Domain;
 
 namespace OrderService.Domain.Events;
 

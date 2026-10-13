@@ -1,7 +1,8 @@
 using System;
-using BuildingBlocks.Domain;
 using OrderService.Domain.Events;
 using OrderService.Domain.ValueObjects;
+using Shared.Domain;
+using Contracts.Orders.Events;
 
 namespace OrderService.Domain.Orders;
 
@@ -35,6 +36,9 @@ public sealed class Order : AggregateRoot
 
         if (type == OrderType.Market && limitPrice is not null)
             throw new DomainException("Market order cannot have a limit price.");
+
+        if (quantity.IsZero)
+            throw new DomainException("Order quantity must be greater than zero.");
 
         var order = new Order
         {

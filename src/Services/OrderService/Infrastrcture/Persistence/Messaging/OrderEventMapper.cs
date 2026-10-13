@@ -1,6 +1,6 @@
 
 using System.Text.Json;
-using BuildingBlocks.Domain;
+using Shared.Domain;
 using Contracts.Orders.Events;
 using OrderService.Domain.Events;
 

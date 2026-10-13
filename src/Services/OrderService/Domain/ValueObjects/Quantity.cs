@@ -1,5 +1,5 @@
 using System;
-using BuildingBlocks.Domain;
+using Shared.Domain;
 
 namespace OrderService.Domain.ValueObjects;
 
@@ -13,7 +13,7 @@ public sealed record Quantity
 
     public static Quantity From(int value)
     {
-        if (value <= 0)
+        if (value < 0)
             throw new DomainException("Quantity must be greater than zero.");
 
         if (value > MaxValue)
@@ -26,6 +26,8 @@ public sealed record Quantity
     public Quantity Add(Quantity other) => From(Value + other.Value);
 
     public bool IsGreaterThan(Quantity other) => Value > other.Value;
+    public bool IsZero => Value == 0;
+
 
     public override string ToString() => Value.ToString();
 }

@@ -1,5 +1,5 @@
 using System;
-using BuildingBlocks.Domain;
+using Shared.Domain;
 using OrderService.Domain.Orders;
 using OrderService.Domain.ValueObjects;
 
