@@ -7,6 +7,7 @@
     <Project Path="src/Gateway/ApiGateway/ApiGateway.csproj" />
   </Folder>
   <Folder Name="/src/Services/">
+    <Project Path="src/Services/ExecutionService/ExecutionService.csproj" />
     <Project Path="src/Services/OrderService/OrderService.csproj" />
   </Folder>
   <Folder Name="/src/Shared/">

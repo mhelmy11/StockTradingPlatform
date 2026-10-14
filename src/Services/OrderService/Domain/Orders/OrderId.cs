@@ -13,7 +13,7 @@ public sealed record OrderId
 
     public static OrderId From(Guid value)
     {
-        if (value == Guid.Empty)
+        if (value == Guid.Empty || Guid.TryParse(value.ToString(), out _) == false)
             throw new DomainException("OrderId cannot be empty.");
         return new OrderId(value);
     }
