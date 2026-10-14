@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OrderService.Infrastrcture.Persistence;
+using OrderService.Infrastrcture.Persistence.Messaging;
 using OrderService.Infrastrcture.Persistence.Outbox;
 using OrderService.Infrastructure.Persistence;
 using OrderService.Infrastructure.Persistence.Outbox;
@@ -15,21 +16,24 @@ namespace OrderService.Infrastructure.Messaging;
 public sealed class RabbitMqOutboxPublisher : BackgroundService
 {
     private const int BatchSize = 100;
-    private static readonly TimeSpan IdleDelay = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan IdleDelay = TimeSpan.FromSeconds(20);
     private static readonly TimeSpan FailureDelay = TimeSpan.FromSeconds(10);
 
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IBus _bus;
     private readonly ILogger<RabbitMqOutboxPublisher> _logger;
+    private readonly OutboxSignal outboxSignal;
 
     public RabbitMqOutboxPublisher(
         IServiceScopeFactory scopeFactory,
         IBus bus,
-        ILogger<RabbitMqOutboxPublisher> logger)
+        ILogger<RabbitMqOutboxPublisher> logger,
+        OutboxSignal outboxSignal)
     {
         _scopeFactory = scopeFactory;
         _bus = bus;
         _logger = logger;
+        this.outboxSignal = outboxSignal;
     }
 
     protected override async Task ExecuteAsync(CancellationToken ct)
@@ -41,9 +45,10 @@ public sealed class RabbitMqOutboxPublisher : BackgroundService
             try
             {
                 var processed = await ProcessBatchAsync(ct);
+                _logger.LogInformation("Processed {Count} outbox messages in this batch.", processed);
 
                 if (processed == 0)
-                    await Task.Delay(IdleDelay, ct);
+                    await outboxSignal.WaitAsync(IdleDelay, ct);
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {

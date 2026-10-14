@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OrderService.Application.Abstraction;
 using OrderService.Domain.Orders;
 using OrderService.Infrastrcture.Persistence;
+using OrderService.Infrastrcture.Persistence.Messaging;
 using OrderService.Infrastrcture.Persistence.Repositories;
 using OrderService.Infrastructure.Messaging;
 
@@ -39,6 +40,8 @@ public static class DependencyInjection
         });
 
         services.AddHostedService<RabbitMqOutboxPublisher>();
+
+        services.AddSingleton<OutboxSignal>();
 
         return services;
     }

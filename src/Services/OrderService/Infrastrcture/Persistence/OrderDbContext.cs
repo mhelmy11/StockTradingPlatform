@@ -3,17 +3,24 @@ using Microsoft.EntityFrameworkCore;
 using OrderService.Domain.Orders;
 using OrderService.Infrastructure.Messaging;
 using OrderService.Infrastructure.Persistence.Outbox;
+using OrderService.Infrastrcture.Persistence.Outbox;
+using OrderService.Infrastrcture.Persistence.Messaging;
 
 namespace OrderService.Infrastrcture.Persistence;
 
 
 public sealed class OrderDbContext : DbContext
 {
+    private readonly OutboxSignal signal;
+
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
-    public OrderDbContext(DbContextOptions<OrderDbContext> options)
-        : base(options) { }
+    public OrderDbContext(DbContextOptions<OrderDbContext> options, OutboxSignal signal)
+        : base(options)
+    {
+        this.signal = signal;
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,6 +56,11 @@ public sealed class OrderDbContext : DbContext
             OutboxMessages.AddRange(outboxMessages);
 
         var result = await base.SaveChangesAsync(ct);
+
+        if (outboxMessages.Any(m => m.Destination == OutboxDestination.RabbitMQ))
+        {
+            signal.Signal();
+        }
 
         foreach (var aggregate in aggregates)
             aggregate.ClearDomainEvents();
