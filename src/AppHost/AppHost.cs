@@ -150,8 +150,21 @@ var redis = builder.AddRedis("redis")
     .WithRedisInsight(redisInsight => redisInsight.WithHostPort(8001));
 #endregion
 
+
+#region RabbitMQ
+
+var rabbitMqUsername = builder.AddParameter("RABBITMQ-USERNAME", secret: true);
+var rabbitMqPassword = builder.AddParameter("RABBITMQ-PASSWORD", secret: true);
+
+var rabbitmq = builder.AddRabbitMQ("rabbitmq", rabbitMqUsername, rabbitMqPassword, 5672)
+    .WithManagementPlugin(15672)  //UI on port 15672
+    .WithDataVolume("stocktrading-rabbit-data")
+    .WithLifetime(ContainerLifetime.Persistent);
+#endregion
+
 var orderService = builder.AddProject<OrderService>("order-service")
     .WithReference(sqlserver)
+    .WithReference(rabbitmq)
     .WithExternalHttpEndpoints();
 
 builder.AddProject<ApiGateway>("APIGateway")

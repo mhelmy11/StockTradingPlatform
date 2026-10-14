@@ -1,7 +1,10 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using OrderService.Application.Abstraction;
 using OrderService.Domain.Orders;
+using OrderService.Infrastrcture.Persistence;
 using OrderService.Infrastrcture.Persistence.Repositories;
+using OrderService.Infrastructure.Messaging;
 
 namespace OrderService.Infrastrcture.Persistence;
 
@@ -18,6 +21,24 @@ public static class DependencyInjection
 
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+
+        services.AddMassTransit(x =>
+        {
+            var rabbitConnectionString = configuration.GetConnectionString("rabbitmq");
+
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                if (!string.IsNullOrEmpty(rabbitConnectionString))
+                {
+                    cfg.Host(new Uri(rabbitConnectionString));
+                }
+
+                cfg.ConfigureEndpoints(context);
+            });
+        });
+
+        services.AddHostedService<RabbitMqOutboxPublisher>();
 
         return services;
     }

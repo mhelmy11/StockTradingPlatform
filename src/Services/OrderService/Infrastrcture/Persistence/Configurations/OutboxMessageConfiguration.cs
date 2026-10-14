@@ -1,15 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using OrderService.Infrastrcture.Persistence.Outbox;
+using OrderService.Infrastructure.Persistence.Outbox;
 
-namespace OrderService.Infrastrcture.Persistence.Configurations;
+namespace OrderService.Infrastructure.Persistence.Configurations;
 
 public sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<OutboxMessage>
 {
     public void Configure(EntityTypeBuilder<OutboxMessage> builder)
     {
         builder.ToTable("OutboxMessages");
-
         builder.HasKey(m => m.Id);
 
         builder.Property(m => m.Type)
@@ -21,16 +20,33 @@ public sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<Outbox
             .HasColumnType("nvarchar(max)")
             .IsRequired();
 
+        builder.Property(m => m.Destination)
+            .HasConversion<int>()
+            .IsRequired();
+
         builder.Property(m => m.OccurredAt)
             .HasColumnType("datetimeoffset")
             .IsRequired();
 
         builder.Property(m => m.ProcessedAt)
-            .HasColumnType("datetimeoffset");;
+            .HasColumnType("datetimeoffset");
 
-        builder.Property(m => m.Error)
+        builder.Property(m => m.RetryCount)
+            .HasDefaultValue(0)
+            .IsRequired();
+
+        builder.Property(m => m.LastError)
             .HasMaxLength(2000);
 
-        builder.HasIndex(m => m.OccurredAt);
+        builder.Property(m => m.NextRetryAt)
+            .HasColumnType("datetimeoffset");
+
+        builder.Property(m => m.IsDeadLettered)
+            .HasDefaultValue(false)
+            .IsRequired();
+
+        builder.HasIndex(m => new { m.Destination, m.NextRetryAt, m.OccurredAt })
+            .HasFilter("[ProcessedAt] IS NULL AND [IsDeadLettered] = 0")
+            .HasDatabaseName("IX_OutboxMessages_Pending");
     }
 }

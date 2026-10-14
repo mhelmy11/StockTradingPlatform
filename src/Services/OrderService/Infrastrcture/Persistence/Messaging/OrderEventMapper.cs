@@ -1,10 +1,11 @@
-
 using System.Text.Json;
-using Shared.Domain;
+using Contracts.Orders.Commands;
 using Contracts.Orders.Events;
 using OrderService.Domain.Events;
+using OrderService.Infrastrcture.Persistence.Outbox;
+using Shared.Domain;
 
-namespace OrderService.Infrastrcture.Persistence.Messaging;
+namespace OrderService.Infrastructure.Messaging;
 
 public static class OrderEventMapper
 {
@@ -14,13 +15,14 @@ public static class OrderEventMapper
         WriteIndented = false
     };
 
-    public static (string Type, string Payload)? Map(IDomainEvent domainEvent)
+
+    public static IReadOnlyList<OutboxEntry> Map(IDomainEvent domainEvent)
     {
         return domainEvent switch
         {
-            OrderPlacedDomainEvent e => Serialize(
-                nameof(OrderPlaced),
-                new OrderPlaced(
+            OrderPlacedDomainEvent e => new[]
+            {
+                Kafka(nameof(OrderPlaced), new OrderPlaced(
                     OrderId: e.OrderId.Value,
                     UserId: e.UserId.Value,
                     Symbol: e.Symbol.Value,
@@ -30,31 +32,55 @@ public static class OrderEventMapper
                     LimitPrice: e.LimitPrice?.Amount,
                     PlacedAt: e.OccurredAt)),
 
-            OrderCancelledDomainEvent e => Serialize(
-                nameof(OrderCancelled),
-                new OrderCancelled(
+                // Command → RabbitMQ (for Execution)
+                RabbitMq(nameof(ExecuteOrder), new ExecuteOrder(
+                    OrderId: e.OrderId.Value,
+                    UserId: e.UserId.Value,
+                    Symbol: e.Symbol.Value,
+                    Side: (int)e.Side,
+                    Type: (int)e.Type,
+                    Quantity: e.Quantity.Value,
+                    LimitPrice: e.LimitPrice?.Amount,
+                    PlacedAt: e.OccurredAt))
+            },
+
+            OrderCancelledDomainEvent e => new[]
+            {
+                Kafka(nameof(OrderCancelled), new OrderCancelled(
                     OrderId: e.OrderId.Value,
                     UserId: e.UserId.Value,
                     Symbol: e.Symbol.Value,
                     CancelledAt: e.OccurredAt)),
 
-            OrderFilledDomainEvent e => Serialize(
-                nameof(OrderFilled),
-                new OrderFilled(
+                RabbitMq(nameof(CancelOrderExecution), new CancelOrderExecution(
+                    OrderId: e.OrderId.Value,
+                    CancelledAt: e.OccurredAt))
+            },
+
+            OrderFilledDomainEvent e => new[]
+            {
+                Kafka(nameof(OrderFilled), new OrderFilled(
                     OrderId: e.OrderId.Value,
                     UserId: e.UserId.Value,
                     Symbol: e.Symbol.Value,
                     FilledQuantity: e.FilledQuantity.Value,
                     ExecutionPrice: e.ExecutionPrice.Amount,
                     NewStatus: (int)e.NewStatus,
-                    FilledAt: e.OccurredAt)),
+                    FilledAt: e.OccurredAt))
+            },
 
-            _ => null
+            _ => Array.Empty<OutboxEntry>()
         };
     }
 
-    private static (string Type, string Payload) Serialize<T>(string type, T payload)
-    {
-        return (type, JsonSerializer.Serialize(payload, JsonOptions));
-    }
+    private static OutboxEntry Kafka<T>(string type, T payload) =>
+        new(type, JsonSerializer.Serialize(payload, JsonOptions), OutboxDestination.Kafka);
+
+    private static OutboxEntry RabbitMq<T>(string type, T payload) =>
+        new(type, JsonSerializer.Serialize(payload, JsonOptions), OutboxDestination.RabbitMQ);
+
+    public readonly record struct OutboxEntry(
+        string Type,
+        string Payload,
+        OutboxDestination Destination);
 }
