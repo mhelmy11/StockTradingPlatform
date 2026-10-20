@@ -167,8 +167,15 @@ var orderService = builder.AddProject<OrderService>("order-service")
     .WithReference(rabbitmq)
     .WithExternalHttpEndpoints();
 
+
+var executionService = builder.AddProject<ExecutionService>("execution-service")
+.WithReference(sqlserver)
+.WithReference(rabbitmq)
+.WithExternalHttpEndpoints();
+
 builder.AddProject<ApiGateway>("APIGateway")
 .WithReference(orderService)
+.WithReference(executionService)
 .WithReference(keycloak)
 .WithReference(redis);
 

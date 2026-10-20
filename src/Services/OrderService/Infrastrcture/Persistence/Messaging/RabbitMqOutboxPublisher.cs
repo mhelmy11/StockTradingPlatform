@@ -35,6 +35,11 @@ public sealed class RabbitMqOutboxPublisher : BackgroundService
         _logger = logger;
         this.outboxSignal = outboxSignal;
     }
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true
+    };
 
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
@@ -120,9 +125,9 @@ public sealed class RabbitMqOutboxPublisher : BackgroundService
         object? command = msg.Type switch
         {
             nameof(ExecuteOrder) =>
-                JsonSerializer.Deserialize<ExecuteOrder>(msg.Payload),
+                JsonSerializer.Deserialize<ExecuteOrder>(msg.Payload, JsonOptions),
             nameof(CancelOrderExecution) =>
-                JsonSerializer.Deserialize<CancelOrderExecution>(msg.Payload),
+                JsonSerializer.Deserialize<CancelOrderExecution>(msg.Payload, JsonOptions),
             _ => null
         };
 
